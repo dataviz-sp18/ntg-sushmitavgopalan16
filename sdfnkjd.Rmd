@@ -15,7 +15,6 @@ library(RColorBrewer)
 library(stringr)
 library(shiny)
 library(tidytext)
-
 df <- read.csv(file = 'latest_6pm.csv', stringsAsFactors = FALSE) %>%
       select(c('name', 'tokens','start','end'))
 
@@ -31,7 +30,16 @@ Column {.sidebar}
 
 ```{r}
 selectInput('sender', 'Name of Sender', senders, selected = senders[0])
+
 ```
+
+This is a fun little app I made for my family to take a look at the things we talk to each other about. We have a family group on Whatsapp with multiple aunts, uncles, cousins, neices and nephews. Choose a family member to view their word cloud!
+
+I use a subset of around 2500 text messages exchanged among us. For each wordcloud, I filter by the sender of the message, remove messages that are not in English, remove stop-words and website links. I used the tidytext package to do this - it's very useful! 
+
+The density of the wordcloud is proportional to the number of words (after removing stop words) used by each person. You can see that my Father is the most talkative amongst us! I love how positive all the word clouds in general are - there's lots of 'hahaha' and 'happy' and 'birthday' and 'cute'. 
+
+It does lose a little nuance because a non-trivial proportion of our communication happens in Tamil script. I would, in the future, love to learn how to analyse Tamil in R. I used a dark palette to make the words pop against a white background. The general layout of the app is rather sparse and allows focus to remain on the colourful wordcloud. I haven't included the text messages file because I haven't obtained consent from my family members to release their communique. 
 
 Column
 -----------------------------------------------------------------------
@@ -48,12 +56,11 @@ renderPlot({
   select(tokens) %>%
   unnest_tokens(tokens, tokens) %>% 
   dplyr::count(tokens, sort = TRUE) %>% 
+  filter(!tokens %in% stop_words$word) %>%
   ungroup() %>%
   with(wordcloud(tokens, n, random.order = FALSE, colors = pal))
 
   })
 ```
-
-
 
 

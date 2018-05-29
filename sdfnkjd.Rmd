@@ -1,0 +1,59 @@
+---
+title: "Group Chats!"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+    source_code: embed
+runtime: shiny
+---
+
+```{r}
+library(dplyr)
+library(wordcloud)
+library(RColorBrewer)
+library(stringr)
+library(shiny)
+library(tidytext)
+
+df <- read.csv(file = 'latest_6pm.csv', stringsAsFactors = FALSE) %>%
+      select(c('name', 'tokens','start','end'))
+
+senders <- df$name
+data("stop_words")
+pal <- brewer.pal(8,"Dark2")
+
+```
+
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+selectInput('sender', 'Name of Sender', senders, selected = senders[0])
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Word Clouds
+
+```{r}
+
+# Combine the selected variables into a new data frame
+
+renderPlot({
+  tokens <- df %>% 
+  filter(name == input$sender) %>% 
+  select(tokens) %>%
+  unnest_tokens(tokens, tokens) %>% 
+  dplyr::count(tokens, sort = TRUE) %>% 
+  ungroup() %>%
+  with(wordcloud(tokens, n, random.order = FALSE, colors = pal))
+
+  })
+```
+
+
+
+
